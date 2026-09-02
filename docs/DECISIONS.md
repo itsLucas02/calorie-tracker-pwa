@@ -60,10 +60,20 @@ Default bias: choose the simpler option unless meal grouping materially improves
 
 ## D-009 — Frontend stack
 
-**Status:** Open  
-**Question:** Which frontend stack should KiraCal use?
+**Status:** Accepted  
+**Decision:** Use **React + TypeScript + Vite** for the KiraCal web/PWA frontend.
 
-No framework or library has been selected yet. The decision should favor a simple PWA development experience, good mobile UX, maintainability, and easy collaboration.
+Use **Tailwind CSS + shadcn/ui** as the initial UI layer.
+
+Rationale:
+
+- KiraCal is primarily a client-side application and does not currently require server-side rendering.
+- Vite keeps development setup small and fast.
+- React is familiar, maintainable, and easy for collaborators to work with.
+- TypeScript can be shared conceptually across frontend and backend.
+- Tailwind and shadcn/ui provide reusable UI behavior without forcing KiraCal into a generic visual identity.
+
+Do not introduce Next.js or another full-stack web framework unless a future requirement clearly justifies it.
 
 ## D-010 — Natural-language AI meal analysis is MVP
 
@@ -103,7 +113,7 @@ The exact BMR/TDEE formula and goal adjustment are still open implementation dec
 **Status:** Accepted  
 **Decision:** Google will be the authentication method for the MVP.
 
-Current architecture direction: use **Supabase Auth with the Google provider**, rather than building a separate custom OAuth/session system.
+Use **Supabase Auth with the Google provider**, rather than building a separate custom OAuth/session system.
 
 Additional login methods are not required for v0.1.
 
@@ -119,11 +129,22 @@ The public PWA must never receive a Supabase secret/service-role key.
 ## D-015 — Railway for the custom backend/API
 
 **Status:** Accepted  
-**Decision:** KiraCal's custom backend/API will be deployed on Railway.
+**Decision:** KiraCal's custom backend/API will be deployed on Railway using **Node.js + TypeScript + Hono**.
 
-The Railway service should remain intentionally small. Its first essential job is to handle server-side AI meal analysis and protect AI provider credentials.
+The Railway service should remain intentionally small. Its first product responsibility is to handle server-side AI meal analysis and protect AI provider credentials.
 
-The backend framework/runtime has not yet been selected.
+The initial proof-of-life route is:
+
+```text
+GET /health
+→ { "status": "ok" }
+```
+
+The first real product endpoint will conceptually be:
+
+```text
+POST /api/analyze-meal
+```
 
 ## D-016 — Minimal backend responsibility
 
@@ -136,7 +157,7 @@ Preferred KISS architecture for the MVP:
 KiraCal PWA
 ├── Supabase Auth (Google sign-in)
 ├── Supabase Database (user/profile/meal data, protected by RLS)
-└── Railway API
+└── Railway Hono API
     └── AI meal-analysis provider
 ```
 
@@ -157,12 +178,14 @@ Potential strategies:
 
 Support for Malaysian foods is an important selection criterion.
 
+The provider should be selected after testing a small set of affordable candidate models against realistic Malaysian meal descriptions rather than choosing from marketing benchmarks alone.
+
 ## D-018 — Railway cost posture
 
 **Status:** Accepted  
 **Decision:** Start on Railway's lowest-cost/free experimentation tier and only pay for more capacity when actual usage requires it.
 
-As checked in September 2026, Railway offers a 30-day trial with $5 in credits and a $0 Free plan with $1/month of included resource credit afterward. Pricing should be rechecked before production launch because platform pricing can change.
+Pricing should be rechecked before production launch because platform pricing can change.
 
 ## D-019 — Mobile browser support is an MVP requirement
 
@@ -180,3 +203,64 @@ The browser experience and installed-PWA experience should share the same core f
 Because there is no initial App Store or Google Play Store budget, the mobile web/PWA distribution path is the product's primary distribution channel, not a temporary secondary experience.
 
 Safari should be treated as a first-class compatibility target rather than assuming Chromium behavior. Browser-specific install UI and PWA capabilities may differ, so KiraCal should use progressive enhancement and avoid depending on optional PWA APIs for core functionality.
+
+## D-020 — Keep web and API in one repository
+
+**Status:** Accepted  
+**Decision:** Use one repository with a small app-oriented structure:
+
+```text
+calorie-tracker-pwa/
+├── apps/
+│   ├── web/
+│   └── api/
+├── supabase/
+│   └── migrations/
+├── docs/
+├── package.json
+└── README.md
+```
+
+Do not create a separate backend repository for the MVP.
+
+Do not introduce shared-package layers, microservices, queues, or additional infrastructure until a concrete need appears.
+
+## D-021 — Build vertically, starting with a runnable shell
+
+**Status:** Accepted  
+**Decision:** The first coding milestone is **Milestone 0: KiraCal boots**.
+
+Before real auth, database tables, or AI integration, the repository should produce:
+
+- a locally runnable React/Vite mobile-first screen using placeholder data
+- a meal-description input
+- a placeholder daily calorie summary
+- a locally runnable Hono API
+- a successful `GET /health`
+
+After Milestone 0, build in this order:
+
+1. Google authentication
+2. Personal calorie plan
+3. AI meal analysis
+4. Supabase meal persistence + RLS
+5. Real daily dashboard/history
+6. Mobile-browser/PWA hardening
+
+This sequence is intended to keep debugging focused and make progress visible.
+
+## D-022 — Do not choose the AI provider yet
+
+**Status:** Accepted  
+**Decision:** Defer the final AI provider/model selection until the API skeleton exists and a small model comparison can be run with realistic Malaysian meals.
+
+Representative tests should include dishes such as:
+
+```text
+nasi putih, ayam kari, kangkung belacan
+roti canai dua keping dengan dhal
+nasi kandar ayam goreng, kuah campur, telur masin
+mee goreng mamak dengan telur mata
+```
+
+Selection criteria should include Malaysian-food understanding, structured-output reliability, useful nutrition estimation, latency, and cost.
