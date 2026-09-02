@@ -1,32 +1,87 @@
 # KiraCal Architecture
 
-This document describes the current MVP architecture direction. It is intentionally small and should change only when the product needs more complexity.
+This document describes the current MVP architecture. It is intentionally small and should gain complexity only when the product needs it.
+
+## Locked technology stack
+
+### Web / PWA
+
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- shadcn/ui
+- Web app manifest and service worker/PWA support
+
+### API
+
+- Node.js
+- TypeScript
+- Hono
+- Railway hosting
+
+### Auth and data
+
+- Supabase Auth
+- Google OAuth provider
+- Supabase PostgreSQL
+- Row Level Security for user-owned data
+
+### AI
+
+- Natural-language text meal analysis is part of the MVP
+- Image analysis is deferred
+- AI provider/model remains intentionally open until a small Malaysian-food bake-off is performed
 
 ## High-level architecture
 
 ```text
-┌─────────────────────┐
-│     KiraCal PWA     │
-│  mobile-first web   │
-└─────────┬───────────┘
-          │
-          ├──────────────────────────────┐
-          │                              │
-          ▼                              ▼
-┌─────────────────────┐       ┌─────────────────────┐
-│      Supabase       │       │     Railway API     │
-│                     │       │                     │
-│ • Google Auth       │       │ • Auth validation   │
-│ • PostgreSQL        │       │ • AI meal analysis  │
-│ • Row Level Security│       │ • Structured output │
-└─────────────────────┘       └──────────┬──────────┘
-                                        │
-                                        ▼
-                              ┌─────────────────────┐
-                              │     AI provider     │
-                              │   model TBD later   │
-                              └─────────────────────┘
+┌─────────────────────────┐
+│   KiraCal React/Vite    │
+│      Web / PWA          │
+└───────────┬─────────────┘
+            │
+            ├───────────────────────────────┐
+            │                               │
+            ▼                               ▼
+┌──────────────────────┐       ┌──────────────────────┐
+│       Supabase       │       │       Railway        │
+│                      │       │       Hono API       │
+│ • Google Auth        │       │                      │
+│ • PostgreSQL         │       │ • Auth validation    │
+│ • Row Level Security │       │ • AI meal analysis   │
+└──────────────────────┘       │ • Structured output  │
+                               └───────────┬──────────┘
+                                           │
+                                           ▼
+                                ┌──────────────────────┐
+                                │     AI provider      │
+                                │      TBD later       │
+                                └──────────────────────┘
 ```
+
+## Repository structure
+
+KiraCal uses one repository for the web app, API, database migrations, and documentation.
+
+```text
+calorie-tracker-pwa/
+├── apps/
+│   ├── web/                 # React + Vite mobile-first PWA
+│   └── api/                 # Hono + Node API deployed to Railway
+├── supabase/
+│   └── migrations/          # schema migration history
+├── docs/
+│   ├── PRODUCT.md
+│   ├── ARCHITECTURE.md
+│   ├── IMPLEMENTATION_PLAN.md
+│   ├── ROADMAP.md
+│   └── DECISIONS.md
+├── package.json
+└── README.md
+```
+
+This is intentionally not a large monorepo architecture. Do not add shared-package layers, microservices, queues, separate worker services, or extra infrastructure unless a concrete requirement appears.
 
 ## Browser-first distribution
 
@@ -74,6 +129,22 @@ Installation wording and UI differ by browser and operating system. The app shou
 
 When useful, KiraCal can provide platform-specific guidance for adding the app to the Home Screen, but the browser version must remain fully usable without doing so.
 
+## Why React + Vite?
+
+KiraCal is a client-focused application and does not currently need server-side rendering or a full-stack web framework.
+
+React + Vite keeps the frontend familiar, fast to start, easy to collaborate on, and suitable for a browser-first PWA. TypeScript is used across both frontend and backend to reduce context switching and make data contracts easier to reason about.
+
+Tailwind CSS and shadcn/ui provide reusable UI behavior while still allowing KiraCal to establish its own visual identity.
+
+## Why Hono on Railway?
+
+The custom API is intentionally tiny. Its first meaningful responsibility is the authenticated meal-analysis endpoint.
+
+Hono provides a small TypeScript HTTP layer without introducing a large backend framework. Node.js keeps the runtime familiar and Railway provides the deployment environment.
+
+The backend should remain small enough that a new contributor can understand it quickly.
+
 ## Why this service split?
 
 KiraCal needs a backend because AI provider credentials must never be shipped inside a public PWA.
@@ -95,7 +166,7 @@ This keeps the custom backend easy to understand, cheap to run, and easy for two
 
 ## Authentication flow
 
-Current direction: **Supabase Auth + Google provider**.
+KiraCal uses **Supabase Auth + Google provider**.
 
 ```text
 User
@@ -126,7 +197,7 @@ KiraCal PWA
   │
   │ Supabase access token
   ▼
-Railway API
+Railway Hono API
   │
   ├── validate authenticated user
   ├── validate request body
@@ -134,7 +205,24 @@ Railway API
   └── return structured meal analysis
 ```
 
-Exact token-validation implementation will be chosen when the backend framework is selected.
+Exact token-validation and validation-library details can be chosen during implementation, but the security boundary is already decided.
+
+## API starting point
+
+Before AI integration, the API needs only one proof-of-life route:
+
+```text
+GET /health
+→ { "status": "ok" }
+```
+
+The first real product endpoint will conceptually be:
+
+```text
+POST /api/analyze-meal
+```
+
+Its job is to accept an authenticated meal description and return validated structured nutrition estimates.
 
 ## AI meal-analysis flow
 
@@ -175,8 +263,6 @@ The API contract should use structured validation rather than trusting arbitrary
 
 AI analysis is an estimate, not authoritative nutrition measurement.
 
-Recommended flow:
-
 ```text
 User describes meal
         ↓
@@ -189,7 +275,7 @@ User reviews / corrects
 Confirmed meal saved to Supabase
 ```
 
-For KISS, the frontend can perform the final save directly to Supabase after user confirmation rather than making Railway save every meal.
+For KISS, the frontend performs the final save directly to Supabase after user confirmation rather than making Railway save every meal.
 
 ## Persistent data
 
@@ -229,7 +315,7 @@ Potentially separate meal-item rows containing:
 - Carbohydrates
 - Fat
 
-The exact schema is still open. We should choose the smallest model that supports editing, history, and totals cleanly.
+The exact schema is still open. Choose the smallest model that supports editing, history, and totals cleanly.
 
 ## Security baseline
 
@@ -243,7 +329,7 @@ The public repository must never contain real `.env` secrets.
 
 ## Offline behavior
 
-KiraCal is a PWA, but AI analysis is inherently network-dependent in the planned MVP.
+KiraCal is a PWA, but AI analysis is network-dependent in the planned MVP.
 
 Therefore:
 
@@ -259,24 +345,28 @@ Full offline AI analysis is not an MVP goal.
 
 Accepted:
 
-- PWA
-- Browser-first/mobile-first distribution
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- shadcn/ui
+- PWA/browser-first distribution
 - Safari, Chrome, and Brave mobile compatibility as an MVP requirement
-- Google authentication
-- Supabase Auth
+- Google authentication through Supabase Auth
 - Supabase/PostgreSQL database
-- Railway-hosted custom API
+- Node.js + TypeScript + Hono API
+- Railway deployment for the custom API
 - Text-only AI meal analysis for MVP
+- Single-repository `apps/web` + `apps/api` structure
 
 Still open:
 
-- Frontend framework
-- Backend runtime/framework
 - AI provider/model
 - Nutrition grounding/data source
 - Validation library/API contract tooling
 - Exact Supabase schema
 - Calorie target formula
+- Visual design details
 
 ## Architecture rule
 
