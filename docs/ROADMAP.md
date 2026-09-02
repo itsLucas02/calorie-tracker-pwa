@@ -8,30 +8,86 @@ This roadmap is intentionally staged. KiraCal should earn complexity rather than
 - [x] Define the core user problem
 - [x] Agree on KISS / MVP-first approach
 - [x] Choose PWA as the initial app format
-- [x] Choose local-first direction for the MVP
+- [x] Make natural-language AI meal analysis part of the MVP
+- [x] Choose Google OAuth for sign-in
+- [x] Choose Supabase for authentication/data persistence
+- [x] Choose Railway to host the application backend/API
+- [x] Define a basic personal calorie-plan calculator as MVP scope
 - [ ] Choose the initial frontend stack
-- [ ] Decide the exact MVP data model
+- [ ] Choose the backend framework/runtime for Railway
+- [ ] Choose the AI model/provider
+- [ ] Choose the nutrition estimation strategy/data source
+- [ ] Decide the exact Supabase data model
+- [ ] Choose the calorie-target/BMR/TDEE calculation formula
 - [ ] Decide whether meal categories are included in v0.1
 - [ ] Define a simple visual direction
 
 ## Phase 1 — Working MVP (v0.1)
 
-Goal: make the smallest genuinely usable calorie tracker.
+Goal: make the smallest genuinely useful AI-assisted nutrition tracker.
+
+### PWA and authentication
 
 - [ ] Mobile-first app shell
 - [ ] Installable PWA
-- [ ] Offline-capable core experience
-- [ ] Set daily calorie target
-- [ ] Add food manually
-- [ ] Edit food entries
-- [ ] Delete food entries
+- [ ] Graceful offline/network error states
+- [ ] Google sign-in
+- [ ] Authenticated session handling
+- [ ] Sign out
+
+### Personal plan
+
+- [ ] Collect required body/profile measurements
+- [ ] Collect activity level
+- [ ] Collect goal: lose / maintain / gain
+- [ ] Calculate an estimated daily calorie target
+- [ ] Let the user manually adjust the target
+- [ ] Save profile/plan to Supabase
+
+### AI meal logging
+
+- [ ] Natural-language meal input
+- [ ] Send meal description to Railway backend
+- [ ] Analyze text using an AI model
+- [ ] Return structured detected foods
+- [ ] Estimate calories per food and meal total
+- [ ] Estimate protein
+- [ ] Estimate carbohydrates
+- [ ] Estimate fat
+- [ ] Show a review screen before saving
+- [ ] Allow correction of AI estimates
+- [ ] Save confirmed meal to Supabase
+
+### Daily tracking
+
+- [ ] Show daily calorie target
 - [ ] Calculate calories eaten
 - [ ] Calculate calories remaining
-- [ ] Daily progress display
+- [ ] Show basic macro totals
+- [ ] Show meals for the selected day
+- [ ] Edit logged meals
+- [ ] Delete logged meals
 - [ ] Browse previous days
-- [ ] Persist data locally
-- [ ] Basic empty/error states
+
+### Backend and data
+
+- [ ] Create Supabase project/schema
+- [ ] Configure Supabase Auth with Google
+- [ ] Enable RLS on user-owned tables
+- [ ] Add ownership policies for user data
+- [ ] Create minimal Railway API service
+- [ ] Keep AI/provider secrets server-side on Railway
+- [ ] Authenticate requests from the PWA to the Railway API
+- [ ] Add basic request validation and error handling
+
+### MVP verification
+
+- [ ] Test common Malaysian meal descriptions
+- [ ] Test vague and specific portion descriptions
+- [ ] Test failed AI/network requests
+- [ ] Verify one user cannot access another user's data
 - [ ] Verify usability on a real phone
+- [ ] Verify installability as a PWA
 
 ## Phase 2 — Polish the core
 
@@ -39,50 +95,55 @@ Only after v0.1 works reliably.
 
 Potential improvements:
 
-- Faster repeat-food logging
-- Recent foods
+- Faster repeat-meal logging
+- Recent meals
 - Favorite foods
+- Saved/common meals
 - Better meal grouping
 - Better date navigation
-- Search/filter local entries
-- Portion/serving notes
-- Export/import or local backup
+- Portion presets
+- AI clarification when portions are ambiguous
+- Better confidence/estimate messaging
+- Better nutrition source grounding
 - Accessibility improvements
-- Install/update UX improvements for the PWA
+- PWA install/update UX improvements
 
-## Phase 3 — Optional cloud layer
+## Phase 3 — Real meal planning
 
-Only if accounts and cross-device use are actually valuable.
+The MVP personal plan only calculates a calorie target. A true meal planner comes later.
 
 Potential features:
 
-- Authentication
-- Cloud database
-- Cross-device sync
-- Account backup/restore
-- Migration from local-only data
-
-The local-first experience should remain useful even if cloud features are added.
+- Suggested meals based on remaining calories/macros
+- Daily meal plans
+- Weekly meal plans
+- Dietary preferences
+- Excluded foods/allergies
+- Saved meal-plan templates
+- Recipe suggestions
+- Grocery lists
 
 ## Phase 4 — Nutrition expansion
 
 Potential features, not commitments:
 
-- Food nutrition database
-- Macronutrients
+- Dedicated food/nutrition database
+- Richer macro targets
+- Micronutrients
 - Barcode scanning
 - Recipes and saved meals
-- Weight tracking
-- Goal/TDEE calculations
+- Weight tracking/history
+- Goal progress
 - Nutrition insights
+- Data export
 
-## Phase 5 — Smart features and integrations
+## Phase 5 — Smart input and integrations
 
 Potential future exploration:
 
-- AI-assisted food entry
 - Photo-based food recognition
-- Natural-language logging
+- Camera meal analysis
+- Voice meal logging
 - Apple Health integration
 - Google Health Connect integration
 - Wearables
@@ -91,9 +152,10 @@ Potential future exploration:
 
 Before adding a feature, ask:
 
-1. Does this improve the core calorie-tracking workflow?
+1. Does this improve the core meal-logging or daily-planning workflow?
 2. Is there evidence we actually need it?
 3. Can we implement a simpler version first?
 4. Will it make everyday logging slower or more confusing?
+5. Does AI add real value here, or are we adding AI for its own sake?
 
 If a feature adds substantial complexity without improving the core workflow, defer it.
