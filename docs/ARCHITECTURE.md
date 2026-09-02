@@ -28,7 +28,53 @@ This document describes the current MVP architecture direction. It is intentiona
                               └─────────────────────┘
 ```
 
-## Why this split?
+## Browser-first distribution
+
+KiraCal is being distributed primarily through the web because native App Store and Google Play Store distribution is not part of the initial budget.
+
+The product must therefore work completely as a normal mobile website. PWA installation enhances the experience but is never required for core functionality.
+
+Priority mobile browser targets for the MVP:
+
+- Safari on iPhone/iPad
+- Chrome on Android
+- Brave on Android and iOS where practical
+
+Core functionality that must work both in-browser and when installed:
+
+- Google sign-in/session handling
+- Personal calorie-plan setup
+- Natural-language meal entry
+- AI analysis requests
+- Review/edit before save
+- Daily calorie and macro totals
+- Meal history and editing
+
+The implementation should use progressive enhancement. Browser-specific PWA features must not become dependencies for the main application workflow.
+
+### Mobile web UX baseline
+
+The UI should account for:
+
+- narrow phone viewports
+- iPhone safe-area insets
+- browser address/navigation bars changing viewport height
+- touch-sized controls
+- on-screen keyboard behavior around meal text input
+- portrait-first use, while remaining functional in landscape
+- responsive layout without horizontal scrolling
+
+Avoid designing the application as a desktop page that merely shrinks down to mobile.
+
+### Installation behavior
+
+KiraCal should provide a valid web app manifest, appropriate icons, and a safe caching/service-worker strategy.
+
+Installation wording and UI differ by browser and operating system. The app should not assume a universal JavaScript install prompt exists.
+
+When useful, KiraCal can provide platform-specific guidance for adding the app to the Home Screen, but the browser version must remain fully usable without doing so.
+
+## Why this service split?
 
 KiraCal needs a backend because AI provider credentials must never be shipped inside a public PWA.
 
@@ -66,6 +112,8 @@ Supabase session returned to KiraCal
 The browser should use a Supabase publishable/public client key only.
 
 Never expose a Supabase secret/service-role key in frontend code.
+
+OAuth redirect behavior must be tested in both ordinary browser tabs and installed-PWA mode on the priority mobile platforms.
 
 ## Railway API authentication
 
@@ -203,6 +251,7 @@ Therefore:
 - Previously loaded state may be cached locally where useful.
 - AI meal analysis requires connectivity.
 - Network failures should produce a clear retry state rather than losing the user's typed meal description.
+- The service worker must not serve stale API/auth responses in ways that break sessions or nutrition data.
 
 Full offline AI analysis is not an MVP goal.
 
@@ -211,6 +260,8 @@ Full offline AI analysis is not an MVP goal.
 Accepted:
 
 - PWA
+- Browser-first/mobile-first distribution
+- Safari, Chrome, and Brave mobile compatibility as an MVP requirement
 - Google authentication
 - Supabase Auth
 - Supabase/PostgreSQL database
