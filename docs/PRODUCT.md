@@ -2,62 +2,134 @@
 
 ## Product statement
 
-KiraCal is a lightweight calorie-tracking PWA focused on making daily calorie logging fast and uncomplicated.
+KiraCal is a lightweight, AI-assisted nutrition-tracking PWA focused on making food logging fast and uncomplicated.
 
-The MVP answers one question:
+The MVP should answer two questions:
 
-> **Can I quickly log what I ate today and see how many calories I have left?**
+> **Can I describe what I just ate and quickly get a useful calorie and nutrition estimate?**
+>
+> **Can KiraCal give me a simple estimated daily calorie target based on my body and goal?**
 
-If the app does that reliably and pleasantly, the MVP succeeds.
+KiraCal deliberately follows a KISS (Keep It Simple, Stupid) approach. AI is included because natural-language meal logging is part of the core experience, but advanced AI features are deferred.
 
-## Target experience
+## Core user scenario
 
-KiraCal should feel closer to a tiny personal utility than a large nutrition platform.
+A user opens KiraCal and types a natural description of their meal, for example:
 
-For the first release, a user should be able to open the app, understand their calorie status immediately, log food in seconds, and leave.
+```text
+Nasi putih, ayam kari, kangkung belacan
+```
+
+A more detailed entry might be:
+
+```text
+1 plate nasi putih, 1 piece ayam kari, and one serving kangkung belacan
+```
+
+KiraCal sends the text to the backend for AI-assisted analysis. The result should be converted into a structured meal estimate containing individual foods and useful nutrition values.
+
+Example result:
+
+```text
+Nasi putih
+Estimated calories: ...
+Protein: ...
+Carbohydrates: ...
+Fat: ...
+
+Ayam kari
+Estimated calories: ...
+Protein: ...
+Carbohydrates: ...
+Fat: ...
+
+Kangkung belacan
+Estimated calories: ...
+Protein: ...
+Carbohydrates: ...
+Fat: ...
+
+Meal total
+Calories: ...
+Protein: ...
+Carbohydrates: ...
+Fat: ...
+```
+
+Nutrition values are estimates rather than medical-grade measurements. Portion size and preparation method can materially change the result, so the interface should make estimates clear and allow correction before or after saving.
 
 ## MVP scope
 
-### 1. Daily calorie target
+### 1. Google sign-in
 
-The user manually sets a daily calorie target, for example `2,000 kcal`.
+Users sign in with Google.
 
-The MVP does **not** calculate TDEE, BMR, weight-loss targets, or personalized recommendations.
+The current direction is to use Supabase Auth with Google as the identity provider so authentication and database identity can remain closely integrated.
 
-### 2. Manual food logging
+Email/password authentication and additional social providers are not required for v0.1.
 
-A food entry needs only the information required to make calorie tracking work:
+### 2. Personal plan setup
+
+KiraCal will include a basic onboarding/calorie-target calculator.
+
+The user provides the minimum information needed to produce a reasonable daily energy estimate. Likely inputs include:
+
+- Age
+- Sex used by the chosen BMR formula
+- Height
+- Weight
+- Activity level
+- Goal: lose, maintain, or gain weight
+
+KiraCal then calculates an **estimated daily calorie target**.
+
+The exact formula and goal adjustments are still an implementation decision. The result must be presented as an estimate, not a medical recommendation.
+
+Users should be able to manually adjust the calculated target if desired.
+
+This feature is called a personal plan or calorie-target calculator in the MVP. A true meal planner that generates specific daily menus is a later feature.
+
+### 3. AI-assisted text meal logging
+
+Natural-language text input is the primary food logging method for the MVP.
+
+The user describes a meal and KiraCal attempts to identify:
+
+- Foods/dishes
+- Approximate portions when supplied or reasonably inferable
+- Estimated calories
+- Estimated protein
+- Estimated carbohydrates
+- Estimated fat
+
+Additional nutrition fields may be included only if they are reliable and do not complicate the initial implementation.
+
+If portion information is too vague, the product may either use a clearly stated default serving estimate or ask for a simple clarification. The UX should favor speed rather than turning logging into a questionnaire.
+
+### 4. Review before save
+
+AI output should not silently become unquestionable truth.
+
+Before or after saving, users should be able to correct important values such as:
 
 - Food name
+- Portion/serving description
 - Calories
-- Date/time or associated day
-- Optional meal category if we decide it improves the UX without adding friction
+- Protein
+- Carbohydrates
+- Fat
 
-Example:
+This gives the MVP a practical fallback when AI estimates are wrong.
 
-```text
-Nasi lemak
-650 kcal
-```
+### 5. Daily diary
 
-Quantity or serving notes can remain optional.
+The main screen displays meals logged for the current day.
 
-### 3. Today's diary
+The first implementation may use a simple chronological list. Breakfast / Lunch / Dinner / Snacks grouping remains optional unless it materially improves the experience.
 
-The main screen displays the foods logged for the current day.
+### 6. Daily summary
 
-Possible meal groups are:
-
-- Breakfast
-- Lunch
-- Dinner
-- Snacks
-
-Meal grouping is not mandatory for the earliest implementation. If it makes the first build unnecessarily complicated, a simple chronological list is preferred.
-
-### 4. Daily summary
-
-The home screen should make the user's calorie position obvious.
+The home screen should make the user's daily position obvious.
 
 Example:
 
@@ -65,37 +137,75 @@ Example:
 Goal       2,000 kcal
 Eaten      1,420 kcal
 Remaining    580 kcal
+Protein       82 g
 ```
 
-A simple progress indicator may complement these numbers, but clarity is more important than decoration.
+Calories are the primary metric. Basic macronutrient totals can be shown because the AI meal analysis already produces them, but the interface should remain uncluttered.
 
-### 5. Edit and delete
+### 7. Edit and delete
 
-Users must be able to correct or remove food entries. Manual calorie tracking becomes frustrating quickly if mistakes cannot be fixed.
+Users must be able to correct or remove logged meals and nutrition estimates.
 
-### 6. History
+### 8. History
 
-Users should be able to inspect previous days and their logged food.
+Users should be able to inspect previous days and their logged meals.
 
-The first implementation can use very simple date navigation such as:
+No advanced analytics dashboard is required for v0.1.
+
+### 9. Persistence and account data
+
+The current MVP direction uses Supabase as the database rather than a purely local-only store.
+
+User data should be associated with the authenticated user and protected so one user cannot access another user's meals or profile.
+
+Local browser state/cache may still be used for responsiveness, but Supabase is the source of persistent account data.
+
+### 10. PWA behavior
+
+KiraCal should remain mobile-first and installable as a PWA.
+
+Because AI meal analysis requires a server/network call, the entire MVP cannot be fully offline. Previously loaded information can still be cached where useful, and the application should handle offline/network failure gracefully.
+
+## MVP user flow
 
 ```text
-← Previous day    Today    Next day →
+Sign in with Google
+        ↓
+First-time plan setup
+(age, height, weight, activity, goal)
+        ↓
+Estimated daily calorie target
+        ↓
+Home
+├── Daily calorie/nutrition summary
+├── Today's meals
+└── + Log meal
+        ↓
+Describe meal in text
+        ↓
+AI analysis
+        ↓
+Review estimated foods + nutrition
+        ↓
+Save meal
+        ↓
+Daily totals update
 ```
 
-No analytics dashboard is required for the MVP.
-
-### 7. Local persistence
-
-Entries and settings must survive page refreshes and reopening the PWA.
-
-The intended MVP is local-first and should use browser storage rather than requiring a server.
-
-### 8. PWA and offline behavior
-
-KiraCal should be installable to a phone/home screen and its core tracking experience should remain usable without an internet connection.
-
 ## Initial screens
+
+### Authentication
+
+- KiraCal branding
+- Continue with Google
+
+### Plan Setup / Profile
+
+- Body/profile inputs required by the selected calorie formula
+- Activity level
+- Weight goal
+- Calculated daily calorie target
+- Manual adjustment option
 
 ### Home
 
@@ -103,54 +213,69 @@ KiraCal should be installable to a phone/home screen and its core tracking exper
 - Daily calorie goal
 - Calories eaten
 - Calories remaining
-- Progress indicator
-- Food entries for the selected day
-- Add Food action
+- Basic macro summary
+- Meals for the selected day
+- Log Meal action
 - Simple date navigation
 
-### Add / Edit Food
+### Log Meal
 
-- Food name
-- Calories
-- Optional meal/serving information if retained
+- Large natural-language text input
+- Analyze action
+- Loading/error state
+
+### Review Meal
+
+- Detected foods
+- Estimated portions
+- Estimated calories and basic macros
+- Meal total
+- Edit/correct action
 - Save
-- Cancel
 
-### Settings
+### Settings / Profile
 
+- Personal measurements
+- Goal/activity settings
 - Daily calorie target
-
-That is enough for the first usable version.
+- Sign out
 
 ## Explicitly out of MVP
 
-The following are useful ideas, but they should **not** block the first release:
+The following should not block v0.1:
 
-- User accounts
-- Cloud sync
+- Image/photo food analysis
+- Camera recognition
 - Barcode scanning
-- Food/nutrition databases
-- AI food recognition
-- Photo calorie estimation
-- Macronutrient tracking
-- Micronutrients
-- Recipes
-- Meal planning
-- TDEE/BMR calculators
-- Weight tracking
+- Voice meal logging
+- Advanced micronutrient analysis
+- Medical or clinical nutrition recommendations
+- Generated weekly meal plans
+- Recipe generation
+- Grocery lists
+- Wearable integrations
 - Apple Health
 - Google Health Connect
-- Wearable integrations
 - Social features
 - Leaderboards
-- Gamification or streak systems
+- Gamification/streak systems
 - Subscriptions/payments
 - Complex analytics
 
-## Open product direction
+## Open product/technical questions
 
-One strategic question remains intentionally undecided:
+### Nutrition estimation source
 
-> Should KiraCal remain an intentionally lightweight calorie tracker, or eventually grow into a broader nutrition product with food databases, macros, barcode scanning, AI recognition, and integrations?
+We still need to choose how AI nutrition estimates are grounded.
 
-We do not need to answer this before building the MVP. The architecture should avoid needless constraints while also avoiding speculative complexity.
+Possible approaches include:
+
+1. LLM-only estimates for the fastest prototype.
+2. AI parses the meal into structured foods and a nutrition database/API provides nutrient values.
+3. A hybrid approach where database values are preferred and AI estimates dishes that are missing.
+
+This decision matters particularly for Malaysian foods and mixed dishes such as nasi lemak, ayam kari, sambal, and kangkung belacan.
+
+### Exact nutrition fields
+
+Calories and protein are definitely useful. Carbohydrates and fat are also reasonable MVP fields. Additional micronutrients should only be added if their estimates are sufficiently trustworthy.
