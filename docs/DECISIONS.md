@@ -163,3 +163,20 @@ Support for Malaysian foods is an important selection criterion.
 **Decision:** Start on Railway's lowest-cost/free experimentation tier and only pay for more capacity when actual usage requires it.
 
 As checked in September 2026, Railway offers a 30-day trial with $5 in credits and a $0 Free plan with $1/month of included resource credit afterward. Pricing should be rechecked before production launch because platform pricing can change.
+
+## D-019 — Mobile browser support is an MVP requirement
+
+**Status:** Accepted  
+**Decision:** KiraCal must work well as a normal mobile website even when the user never installs it as a PWA.
+
+Priority browser targets for v0.1:
+
+- Safari on iPhone/iPad
+- Chrome on Android
+- Brave on Android and iOS where practical
+
+The browser experience and installed-PWA experience should share the same core functionality. Installation must never be required to log meals, view nutrition totals, manage the user's plan, or use Google sign-in.
+
+Because there is no initial App Store or Google Play Store budget, the mobile web/PWA distribution path is the product's primary distribution channel, not a temporary secondary experience.
+
+Safari should be treated as a first-class compatibility target rather than assuming Chromium behavior. Browser-specific install UI and PWA capabilities may differ, so KiraCal should use progressive enhancement and avoid depending on optional PWA APIs for core functionality.
