@@ -14,8 +14,11 @@ This roadmap is intentionally staged. KiraCal should earn complexity rather than
 - [x] Choose Railway to host the application backend/API
 - [x] Define a basic personal calorie-plan calculator as MVP scope
 - [x] Make mobile browser compatibility a first-class MVP requirement
-- [ ] Choose the initial frontend stack
-- [ ] Choose the backend framework/runtime for Railway
+- [x] Choose React + TypeScript + Vite for the web app
+- [x] Choose Tailwind CSS + shadcn/ui for the initial UI layer
+- [x] Choose Node.js + TypeScript + Hono for the Railway API
+- [x] Choose a single-repository `apps/web` + `apps/api` structure
+- [x] Define the vertical implementation order
 - [ ] Choose the AI model/provider
 - [ ] Choose the nutrition estimation strategy/data source
 - [ ] Decide the exact Supabase data model
@@ -23,30 +26,39 @@ This roadmap is intentionally staged. KiraCal should earn complexity rather than
 - [ ] Decide whether meal categories are included in v0.1
 - [ ] Define a simple visual direction
 
+## Milestone 0 — KiraCal boots
+
+Goal: turn the documentation-only repository into a runnable project before adding real product complexity.
+
+- [ ] Create root workspace/package scripts
+- [ ] Scaffold `apps/web` with React + TypeScript + Vite
+- [ ] Add Tailwind CSS
+- [ ] Add shadcn/ui foundation
+- [ ] Add basic PWA manifest/service-worker setup
+- [ ] Build a mobile-first placeholder home screen
+- [ ] Add placeholder daily calorie values
+- [ ] Add placeholder natural-language meal input
+- [ ] Scaffold `apps/api` with Node.js + TypeScript + Hono
+- [ ] Add `GET /health`
+- [ ] Make local development simple from the repository root
+- [ ] Confirm no secrets are committed
+
 ## Phase 1 — Working MVP (v0.1)
 
 Goal: make the smallest genuinely useful AI-assisted nutrition tracker.
 
-### PWA and mobile web
-
-- [ ] Mobile-first responsive app shell
-- [ ] Full core functionality without requiring PWA installation
-- [ ] Installable PWA
-- [ ] Web app manifest and appropriate app icons
-- [ ] Service-worker/cache strategy that does not break normal browsing
-- [ ] Respect mobile safe areas, touch targets, and virtual keyboards
-- [ ] Graceful offline/network error states
-- [ ] Google sign-in works correctly from supported mobile browsers
-- [ ] Avoid core dependencies on browser-specific PWA APIs
-
 ### Authentication
 
-- [ ] Google sign-in
-- [ ] Authenticated session handling
-- [ ] Sign out
+- [ ] Create/configure Supabase project
+- [ ] Configure Supabase Auth with Google
+- [ ] Add Google sign-in
+- [ ] Add authenticated session handling
+- [ ] Add sign out
+- [ ] Verify OAuth redirects on priority mobile browsers
 
 ### Personal plan
 
+- [ ] Choose calorie-target/BMR/TDEE formula
 - [ ] Collect required body/profile measurements
 - [ ] Collect activity level
 - [ ] Collect goal: lose / maintain / gain
@@ -56,17 +68,31 @@ Goal: make the smallest genuinely useful AI-assisted nutrition tracker.
 
 ### AI meal logging
 
-- [ ] Natural-language meal input
-- [ ] Send meal description to Railway backend
-- [ ] Analyze text using an AI model
+- [ ] Compare candidate AI models using representative Malaysian meals
+- [ ] Choose AI provider/model
+- [ ] Choose initial nutrition-grounding strategy
+- [ ] Add natural-language meal input
+- [ ] Add authenticated `POST /api/analyze-meal` request
+- [ ] Analyze text using the selected AI model
 - [ ] Return structured detected foods
 - [ ] Estimate calories per food and meal total
 - [ ] Estimate protein
 - [ ] Estimate carbohydrates
 - [ ] Estimate fat
+- [ ] Validate structured AI output
 - [ ] Show a review screen before saving
 - [ ] Allow correction of AI estimates
-- [ ] Save confirmed meal to Supabase
+
+### Backend and data
+
+- [ ] Decide the minimum Supabase schema
+- [ ] Add schema migrations under `supabase/migrations`
+- [ ] Enable RLS on user-owned tables
+- [ ] Add ownership policies for user data
+- [ ] Keep AI/provider secrets server-side on Railway
+- [ ] Authenticate requests from the PWA to the Railway API
+- [ ] Add request validation and clear error handling
+- [ ] Save confirmed meals directly from the PWA to Supabase under RLS
 
 ### Daily tracking
 
@@ -79,16 +105,15 @@ Goal: make the smallest genuinely useful AI-assisted nutrition tracker.
 - [ ] Delete logged meals
 - [ ] Browse previous days
 
-### Backend and data
+### PWA and mobile web
 
-- [ ] Create Supabase project/schema
-- [ ] Configure Supabase Auth with Google
-- [ ] Enable RLS on user-owned tables
-- [ ] Add ownership policies for user data
-- [ ] Create minimal Railway API service
-- [ ] Keep AI/provider secrets server-side on Railway
-- [ ] Authenticate requests from the PWA to the Railway API
-- [ ] Add basic request validation and error handling
+- [ ] Full core functionality without requiring PWA installation
+- [ ] Installable PWA
+- [ ] Web app manifest and appropriate app icons
+- [ ] Service-worker/cache strategy that does not break normal browsing
+- [ ] Respect mobile safe areas, touch targets, and virtual keyboards
+- [ ] Graceful offline/network error states
+- [ ] Avoid core dependencies on browser-specific PWA APIs
 
 ### MVP verification
 
