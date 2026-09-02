@@ -18,9 +18,9 @@ The project deliberately follows **KISS (Keep It Simple, Stupid)**. AI is part o
 
 ## Status
 
-🚧 **Early planning / MVP**
+🚧 **MVP scope locked / implementation starting**
 
-Product and technical decisions are documented in this repository as the project evolves.
+The first implementation should now focus on making KiraCal runnable rather than adding more product scope.
 
 ## MVP
 
@@ -37,7 +37,8 @@ The first usable version should let a user:
 - Track basic macros such as protein, carbohydrates, and fat
 - Edit/delete logged meals
 - Review previous days
-- Install KiraCal as a PWA
+- Use KiraCal fully from a supported mobile browser without installing it
+- Optionally install KiraCal as a PWA
 
 ### Example flow
 
@@ -61,52 +62,99 @@ Save
 Daily totals update
 ```
 
+## Locked MVP stack
+
+### Web / PWA
+
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- shadcn/ui
+- Web app manifest + service worker/PWA support
+
+### API
+
+- Node.js
+- TypeScript
+- Hono
+- Deployed on Railway
+
+### Auth and data
+
+- Supabase Auth with Google
+- Supabase PostgreSQL
+- Row Level Security for user-owned data
+
+### AI
+
+- Text-only meal analysis for v0.1
+- AI provider/model intentionally **TBD** until we test real Malaysian meal inputs
+
+## Repository direction
+
+KiraCal stays in one repository:
+
+```text
+calorie-tracker-pwa/
+├── apps/
+│   ├── web/            # React/Vite PWA
+│   └── api/            # Hono API for Railway
+├── supabase/
+│   └── migrations/     # database migrations
+├── docs/
+├── package.json
+└── README.md
+```
+
+Do not add shared-package layers, extra services, or complex infrastructure until the project actually needs them.
+
+## First implementation milestone
+
+**Milestone 0: KiraCal boots.**
+
+Before authentication, AI, or real database data, the repository should reach a state where a contributor can run:
+
+```bash
+npm install
+npm run dev
+```
+
+and get:
+
+- a mobile-first KiraCal web screen using placeholder data
+- a meal-description input
+- a basic daily calorie summary
+- an `apps/api` service with a working `GET /health` endpoint
+
+After that, implementation proceeds vertically: Google auth → personal plan → AI meal analysis → Supabase persistence → real daily dashboard/history → mobile/PWA hardening.
+
 ## Product principles
 
 1. **Working before clever** — ship the smallest useful version first.
 2. **Describe, don't database-search** — natural-language meal logging is the primary MVP interaction.
 3. **Estimates, not false precision** — nutrition depends on portions and preparation, so AI results should be clearly editable estimates.
 4. **Mobile first** — KiraCal is primarily used from a phone.
-5. **Keep the backend small** — use managed services where they remove unnecessary infrastructure work.
-6. **AI where it earns its place** — text meal analysis is MVP; image analysis and other expensive complexity come later.
-7. **Grow deliberately** — a feature idea is not automatically an MVP requirement.
+5. **Browser first** — the full product works in supported mobile browsers; PWA installation is optional.
+6. **Keep the backend small** — use managed services where they remove unnecessary infrastructure work.
+7. **AI where it earns its place** — text meal analysis is MVP; image analysis and other expensive complexity come later.
+8. **Grow deliberately** — a feature idea is not automatically an MVP requirement.
 
 ## Architecture direction
 
 ```text
-KiraCal PWA
+KiraCal React/Vite PWA
 │
 ├── Supabase
 │   ├── Google authentication
 │   └── PostgreSQL database + RLS
 │
-└── Railway API
-    └── AI meal analysis
+└── Railway
+    └── Hono API
+        └── AI meal analysis
 ```
 
-### Responsibilities
-
-**PWA**
-- Mobile UI
-- Google sign-in flow
-- Meal text input
-- Review/edit AI estimates
-- Daily tracking experience
-
-**Supabase**
-- Authentication
-- User/profile data
-- Personal calorie plan
-- Meal history
-- Row Level Security for user-owned data
-
-**Railway backend**
-- Receive authenticated meal-analysis requests
-- Protect AI provider credentials
-- Call the AI/model layer
-- Validate and return structured nutrition estimates
-
-The PWA can access user-owned Supabase data directly under RLS. Railway does not need to become a pass-through layer for every database operation.
+The PWA can access user-owned Supabase data directly under RLS. Railway is reserved for trusted server-side work such as protecting AI credentials and performing meal analysis; it should not become a pass-through layer for every database operation.
 
 ## Not in the MVP
 
@@ -123,12 +171,10 @@ The PWA can access user-owned Supabase data directly under RLS. Railway does not
 
 ## Current open decisions
 
-- Frontend framework/tooling
-- Railway backend framework/runtime
 - AI model/provider
 - Nutrition data/grounding strategy
 - Exact calorie-target calculation formula
-- Supabase schema
+- Exact Supabase schema
 - Meal categories in v0.1
 - Visual design direction
 
@@ -136,6 +182,7 @@ The PWA can access user-owned Supabase data directly under RLS. Railway does not
 
 - [`docs/PRODUCT.md`](docs/PRODUCT.md) — product definition and MVP behavior
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — current system architecture and responsibilities
+- [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md) — implementation milestones and build order
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) — staged feature roadmap
 - [`docs/DECISIONS.md`](docs/DECISIONS.md) — important product and technical decisions
 
