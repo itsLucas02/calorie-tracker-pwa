@@ -13,6 +13,7 @@ This roadmap is intentionally staged. KiraCal should earn complexity rather than
 - [x] Choose Supabase for authentication/data persistence
 - [x] Choose Railway to host the application backend/API
 - [x] Define a basic personal calorie-plan calculator as MVP scope
+- [x] Make mobile browser compatibility a first-class MVP requirement
 - [ ] Choose the initial frontend stack
 - [ ] Choose the backend framework/runtime for Railway
 - [ ] Choose the AI model/provider
@@ -26,11 +27,20 @@ This roadmap is intentionally staged. KiraCal should earn complexity rather than
 
 Goal: make the smallest genuinely useful AI-assisted nutrition tracker.
 
-### PWA and authentication
+### PWA and mobile web
 
-- [ ] Mobile-first app shell
+- [ ] Mobile-first responsive app shell
+- [ ] Full core functionality without requiring PWA installation
 - [ ] Installable PWA
+- [ ] Web app manifest and appropriate app icons
+- [ ] Service-worker/cache strategy that does not break normal browsing
+- [ ] Respect mobile safe areas, touch targets, and virtual keyboards
 - [ ] Graceful offline/network error states
+- [ ] Google sign-in works correctly from supported mobile browsers
+- [ ] Avoid core dependencies on browser-specific PWA APIs
+
+### Authentication
+
 - [ ] Google sign-in
 - [ ] Authenticated session handling
 - [ ] Sign out
@@ -86,8 +96,13 @@ Goal: make the smallest genuinely useful AI-assisted nutrition tracker.
 - [ ] Test vague and specific portion descriptions
 - [ ] Test failed AI/network requests
 - [ ] Verify one user cannot access another user's data
-- [ ] Verify usability on a real phone
-- [ ] Verify installability as a PWA
+- [ ] Verify normal browser usage and installed-PWA usage produce the same core results
+- [ ] Test Safari on a real iPhone/iPad
+- [ ] Test Chrome on a real Android device
+- [ ] Test Brave on representative mobile devices where practical
+- [ ] Test mobile keyboard/form behavior for meal input
+- [ ] Test Add to Home Screen / install flow on supported devices
+- [ ] Verify layout at common narrow mobile widths
 
 ## Phase 2 — Polish the core
 
@@ -106,6 +121,7 @@ Potential improvements:
 - Better confidence/estimate messaging
 - Better nutrition source grounding
 - Accessibility improvements
+- Better cross-browser install guidance
 - PWA install/update UX improvements
 
 ## Phase 3 — Real meal planning
@@ -157,5 +173,6 @@ Before adding a feature, ask:
 3. Can we implement a simpler version first?
 4. Will it make everyday logging slower or more confusing?
 5. Does AI add real value here, or are we adding AI for its own sake?
+6. Does it work across our priority mobile browsers without making core functionality fragile?
 
 If a feature adds substantial complexity without improving the core workflow, defer it.
