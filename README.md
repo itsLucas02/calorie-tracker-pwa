@@ -1,76 +1,141 @@
 # KiraCal
 
-**A simple, fast, installable calorie tracker built as a Progressive Web App (PWA).**
+**A simple AI-assisted calorie and nutrition tracker built as a Progressive Web App (PWA).**
 
-KiraCal starts with one job:
+KiraCal's core experience is straightforward:
 
-> **Quickly log what you ate today and see how many calories you have left.**
+> **Describe what you ate. KiraCal estimates the calories and nutrition, logs it, and shows how it fits your daily target.**
 
-The project deliberately follows a **KISS (Keep It Simple, Stupid)** approach. The first release should work well before it becomes feature-rich.
+Example:
+
+```text
+Nasi putih, ayam kari, kangkung belacan
+```
+
+KiraCal analyzes the text, identifies the foods, estimates calories and basic macronutrients, lets the user review the result, and then adds the meal to the day.
+
+The project deliberately follows **KISS (Keep It Simple, Stupid)**. AI is part of the MVP because it removes friction from food logging, but advanced AI features are not.
 
 ## Status
 
 🚧 **Early planning / MVP**
 
-The repository is starting from a blank canvas. Product decisions and scope will be documented here as the project evolves.
+Product and technical decisions are documented in this repository as the project evolves.
 
 ## MVP
 
-The first usable version of KiraCal should let a user:
+The first usable version should let a user:
 
-- Set a daily calorie target
-- Add food manually with a name and calorie value
-- Edit and delete food entries
-- See calories consumed today
-- See calories remaining for the day
-- Review entries from previous days
-- Keep data persisted on the device
-- Install the app as a PWA
-- Use the core tracker offline
+- Sign in with Google
+- Enter basic body/profile information
+- Get an estimated daily calorie target
+- Adjust that target manually if desired
+- Describe a meal using natural-language text
+- Have AI identify the foods and estimate nutrition
+- Review/correct the AI result
+- Track calories consumed and remaining
+- Track basic macros such as protein, carbohydrates, and fat
+- Edit/delete logged meals
+- Review previous days
+- Install KiraCal as a PWA
 
-The initial user experience should be roughly:
+### Example flow
 
 ```text
+Google Sign-in
+      ↓
+Personal plan setup
+      ↓
+Daily calorie target
+      ↓
 Home
-├── Daily calorie summary
-├── Today's food entries
-└── + Add food
-
-Add Food
-├── Food name
-├── Calories
-└── Save
-
-Settings
-└── Daily calorie goal
+      ↓
+"Nasi putih, ayam kari, kangkung belacan"
+      ↓
+AI meal analysis
+      ↓
+Review calories + macros
+      ↓
+Save
+      ↓
+Daily totals update
 ```
 
 ## Product principles
 
-1. **Working before clever** — ship the smallest useful tracker first.
-2. **Fast logging** — adding food should take very little effort.
-3. **Mobile first** — this is primarily something people will use from their phones.
-4. **Local first** — the MVP should not require an account or backend just to track calories.
-5. **Offline capable** — core tracking should continue to work without an internet connection.
-6. **Grow deliberately** — features such as cloud sync, food databases, barcode scanning, macros, AI, and integrations come later only when they earn their complexity.
+1. **Working before clever** — ship the smallest useful version first.
+2. **Describe, don't database-search** — natural-language meal logging is the primary MVP interaction.
+3. **Estimates, not false precision** — nutrition depends on portions and preparation, so AI results should be clearly editable estimates.
+4. **Mobile first** — KiraCal is primarily used from a phone.
+5. **Keep the backend small** — use managed services where they remove unnecessary infrastructure work.
+6. **AI where it earns its place** — text meal analysis is MVP; image analysis and other expensive complexity come later.
+7. **Grow deliberately** — a feature idea is not automatically an MVP requirement.
 
-## Initial architecture direction
-
-For the MVP, KiraCal is intended to remain extremely small:
+## Architecture direction
 
 ```text
-PWA frontend
-    ↓
-Local browser storage
+KiraCal PWA
+│
+├── Supabase
+│   ├── Google authentication
+│   └── PostgreSQL database + RLS
+│
+└── Railway API
+    └── AI meal analysis
 ```
 
-No backend, authentication, or cloud database is required for the first working version.
+### Responsibilities
 
-A cloud-backed architecture can be introduced later if cross-device sync or accounts become necessary.
+**PWA**
+- Mobile UI
+- Google sign-in flow
+- Meal text input
+- Review/edit AI estimates
+- Daily tracking experience
+
+**Supabase**
+- Authentication
+- User/profile data
+- Personal calorie plan
+- Meal history
+- Row Level Security for user-owned data
+
+**Railway backend**
+- Receive authenticated meal-analysis requests
+- Protect AI provider credentials
+- Call the AI/model layer
+- Validate and return structured nutrition estimates
+
+The PWA can access user-owned Supabase data directly under RLS. Railway does not need to become a pass-through layer for every database operation.
+
+## Not in the MVP
+
+- Photo/image food recognition
+- Camera analysis
+- Barcode scanning
+- Voice logging
+- Full generated meal plans
+- Grocery lists
+- Advanced micronutrients
+- Health/wearable integrations
+- Social features
+- Payments/subscriptions
+
+## Current open decisions
+
+- Frontend framework/tooling
+- Railway backend framework/runtime
+- AI model/provider
+- Nutrition data/grounding strategy
+- Exact calorie-target calculation formula
+- Supabase schema
+- Meal categories in v0.1
+- Visual design direction
 
 ## Documentation
 
 - [`docs/PRODUCT.md`](docs/PRODUCT.md) — product definition and MVP behavior
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — current system architecture and responsibilities
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) — staged feature roadmap
 - [`docs/DECISIONS.md`](docs/DECISIONS.md) — important product and technical decisions
 
