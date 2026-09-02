@@ -14,56 +14,42 @@ The GitHub repository remains `calorie-tracker-pwa` for now. The product name do
 **Status:** Accepted  
 **Decision:** Follow KISS (Keep It Simple, Stupid) and prioritize a small working product over a broad feature set.
 
-The MVP's core job is:
-
-> Quickly log what you ate today and see how many calories you have left.
-
-Features that do not materially help this workflow should not block v0.1.
+The MVP should remain intentionally narrow even though AI is part of the core product.
 
 ## D-003 — Build KiraCal as a PWA
 
 **Status:** Accepted  
 **Decision:** The initial application will be a Progressive Web App rather than a native mobile application.
 
-The product should be mobile-first, installable, and capable of supporting the core tracker offline.
+The product should be mobile-first and installable from a browser.
 
-## D-004 — Local-first MVP
+## D-004 — Local-only MVP
 
-**Status:** Accepted  
-**Decision:** The first working version does not require authentication, a backend, or a cloud database.
+**Status:** Superseded  
+**Previous decision:** Use only local browser storage and avoid authentication/backend infrastructure.
 
-The initial architecture direction is:
+**Superseded because:** The MVP now includes Google sign-in, AI meal analysis, and persistent account data through Supabase. Local state/cache may still improve responsiveness, but it is no longer the source of truth.
 
-```text
-PWA frontend
-    ↓
-Local browser storage
-```
+## D-005 — Manual calorie goal only
 
-This keeps infrastructure and operating cost close to zero while reducing implementation complexity.
+**Status:** Superseded  
+**Previous decision:** Users manually enter a daily calorie target.
 
-A cloud layer may be added later for accounts, backup, or cross-device sync if needed.
-
-## D-005 — Manual calorie goal
-
-**Status:** Accepted  
-**Decision:** Users enter their own daily calorie target in the MVP.
-
-Automatic TDEE/BMR calculations and personalized calorie recommendations are deferred.
+**New direction:** KiraCal will calculate a basic estimated daily calorie target from personal measurements, activity level, and goal. The user should still be able to override the result manually.
 
 ## D-006 — Manual food entry first
 
-**Status:** Accepted  
-**Decision:** Food can initially be logged with a simple name and calorie value.
+**Status:** Superseded  
+**Previous decision:** Food is logged by manually entering a food name and calorie value.
 
-Barcode scanning, food databases, AI recognition, and other automated entry methods are deferred until the manual workflow works well.
+**New direction:** Natural-language AI meal analysis is a core MVP feature. Manual editing remains the fallback for correcting AI estimates.
 
-## D-007 — Product direction after MVP remains open
+## D-007 — Broader product direction
 
-**Status:** Open  
-**Question:** Should KiraCal remain intentionally lightweight, or eventually grow into a broader nutrition platform?
+**Status:** Partially resolved  
+**Decision:** KiraCal is more than a bare calorie counter: the product direction includes AI-assisted nutrition tracking and personal calorie planning.
 
-This does not need to be decided before v0.1. We should avoid architecture choices that unnecessarily prevent future growth, but we should not build speculative infrastructure for hypothetical features either.
+This still does not mean every nutrition feature belongs in the MVP. Advanced planning, integrations, image recognition, and other expansion features remain deferred.
 
 ## D-008 — Meal categories in v0.1
 
@@ -78,3 +64,102 @@ Default bias: choose the simpler option unless meal grouping materially improves
 **Question:** Which frontend stack should KiraCal use?
 
 No framework or library has been selected yet. The decision should favor a simple PWA development experience, good mobile UX, maintainability, and easy collaboration.
+
+## D-010 — Natural-language AI meal analysis is MVP
+
+**Status:** Accepted  
+**Decision:** The primary MVP meal-entry experience is text based.
+
+Example input:
+
+```text
+Nasi putih, ayam kari, kangkung belacan
+```
+
+The AI should convert the description into structured foods and return estimated calories plus basic macronutrients.
+
+Image/photo meal analysis is explicitly deferred.
+
+## D-011 — Nutrition values are estimates and editable
+
+**Status:** Accepted  
+**Decision:** AI-generated nutrition values must be treated as estimates rather than exact measurements.
+
+Users should be able to review and correct important meal values before or after saving. Preparation method and portion size can substantially change calories and nutrients, so the UI must not imply false precision.
+
+## D-012 — Basic personal calorie plan is MVP
+
+**Status:** Accepted  
+**Decision:** KiraCal will collect basic body/profile information and calculate an estimated daily calorie target.
+
+The MVP plan is a calorie-target calculator, not a full generated meal planner.
+
+A true meal planner that suggests specific meals is deferred until after the core tracker works.
+
+The exact BMR/TDEE formula and goal adjustment are still open implementation decisions.
+
+## D-013 — Google sign-in
+
+**Status:** Accepted  
+**Decision:** Google will be the authentication method for the MVP.
+
+Current architecture direction: use **Supabase Auth with the Google provider**, rather than building a separate custom OAuth/session system.
+
+Additional login methods are not required for v0.1.
+
+## D-014 — Supabase for persistent application data
+
+**Status:** Accepted  
+**Decision:** Supabase will provide the project database and authentication layer.
+
+User-owned data such as profile/plan settings and meal history must be protected with Row Level Security and ownership policies.
+
+The public PWA must never receive a Supabase secret/service-role key.
+
+## D-015 — Railway for the custom backend/API
+
+**Status:** Accepted  
+**Decision:** KiraCal's custom backend/API will be deployed on Railway.
+
+The Railway service should remain intentionally small. Its first essential job is to handle server-side AI meal analysis and protect AI provider credentials.
+
+The backend framework/runtime has not yet been selected.
+
+## D-016 — Minimal backend responsibility
+
+**Status:** Accepted  
+**Decision:** Do not route every database operation through Railway simply because a backend exists.
+
+Preferred KISS architecture for the MVP:
+
+```text
+KiraCal PWA
+├── Supabase Auth (Google sign-in)
+├── Supabase Database (user/profile/meal data, protected by RLS)
+└── Railway API
+    └── AI meal-analysis provider
+```
+
+The frontend can use Supabase directly for authenticated user data where RLS safely enforces ownership. Railway exists for operations that genuinely require trusted server-side code or secrets, starting with AI analysis.
+
+Requests to the Railway API should be authenticated using the user's Supabase session/token and validated server-side.
+
+## D-017 — AI provider and nutrition grounding
+
+**Status:** Open  
+**Question:** Which model/provider should perform meal parsing, and where should nutrition values come from?
+
+Potential strategies:
+
+1. LLM-only nutrition estimates for the fastest prototype.
+2. LLM extracts foods/portions; a nutrition database/API supplies nutrient values.
+3. Hybrid: use authoritative/database values where available and AI estimation for dishes not well represented in the database.
+
+Support for Malaysian foods is an important selection criterion.
+
+## D-018 — Railway cost posture
+
+**Status:** Accepted  
+**Decision:** Start on Railway's lowest-cost/free experimentation tier and only pay for more capacity when actual usage requires it.
+
+As checked in September 2026, Railway offers a 30-day trial with $5 in credits and a $0 Free plan with $1/month of included resource credit afterward. Pricing should be rechecked before production launch because platform pricing can change.
