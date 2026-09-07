@@ -1,0 +1,203 @@
+# KiraCal Roadmap
+
+This roadmap is intentionally staged. KiraCal should earn complexity rather than starting with it.
+
+## Phase 0 — Planning
+
+- [x] Choose product name: **KiraCal**
+- [x] Define the core user problem
+- [x] Agree on KISS / MVP-first approach
+- [x] Choose PWA as the initial app format
+- [x] Make natural-language AI meal analysis part of the MVP
+- [x] Choose Google OAuth for sign-in
+- [x] Choose Supabase for authentication/data persistence
+- [x] Choose Railway to host the application backend/API
+- [x] Define a basic personal calorie-plan calculator as MVP scope
+- [x] Make mobile browser compatibility a first-class MVP requirement
+- [x] Choose React + TypeScript + Vite for the web app
+- [x] Choose Tailwind CSS + shadcn/ui for the initial UI layer
+- [x] Choose Node.js + TypeScript + Hono for the Railway API
+- [x] Choose a single-repository `apps/web` + `apps/api` structure
+- [x] Define the vertical implementation order
+- [ ] Choose the AI model/provider
+- [ ] Choose the nutrition estimation strategy/data source
+- [ ] Decide the exact Supabase data model
+- [ ] Choose the calorie-target/BMR/TDEE calculation formula
+- [ ] Decide whether meal categories are included in v0.1
+- [ ] Define a simple visual direction
+
+## Milestone 0 — KiraCal boots
+
+Goal: turn the documentation-only repository into a runnable project before adding real product complexity.
+
+- [ ] Create root workspace/package scripts
+- [ ] Scaffold `apps/web` with React + TypeScript + Vite
+- [ ] Add Tailwind CSS
+- [ ] Add shadcn/ui foundation
+- [ ] Add basic PWA manifest/service-worker setup
+- [ ] Build a mobile-first placeholder home screen
+- [ ] Add placeholder daily calorie values
+- [ ] Add placeholder natural-language meal input
+- [ ] Scaffold `apps/api` with Node.js + TypeScript + Hono
+- [ ] Add `GET /health`
+- [ ] Make local development simple from the repository root
+- [ ] Confirm no secrets are committed
+
+## Phase 1 — Working MVP (v0.1)
+
+Goal: make the smallest genuinely useful AI-assisted nutrition tracker.
+
+### Authentication
+
+- [ ] Create/configure Supabase project
+- [ ] Configure Supabase Auth with Google
+- [ ] Add Google sign-in
+- [ ] Add authenticated session handling
+- [ ] Add sign out
+- [ ] Verify OAuth redirects on priority mobile browsers
+
+### Personal plan
+
+- [ ] Choose calorie-target/BMR/TDEE formula
+- [ ] Collect required body/profile measurements
+- [ ] Collect activity level
+- [ ] Collect goal: lose / maintain / gain
+- [ ] Calculate an estimated daily calorie target
+- [ ] Let the user manually adjust the target
+- [ ] Save profile/plan to Supabase
+
+### AI meal logging
+
+- [ ] Compare candidate AI models using representative Malaysian meals
+- [ ] Choose AI provider/model
+- [ ] Choose initial nutrition-grounding strategy
+- [ ] Add natural-language meal input
+- [ ] Add authenticated `POST /api/analyze-meal` request
+- [ ] Analyze text using the selected AI model
+- [ ] Return structured detected foods
+- [ ] Estimate calories per food and meal total
+- [ ] Estimate protein
+- [ ] Estimate carbohydrates
+- [ ] Estimate fat
+- [ ] Validate structured AI output
+- [ ] Show a review screen before saving
+- [ ] Allow correction of AI estimates
+
+### Backend and data
+
+- [ ] Decide the minimum Supabase schema
+- [ ] Add schema migrations under `supabase/migrations`
+- [ ] Enable RLS on user-owned tables
+- [ ] Add ownership policies for user data
+- [ ] Keep AI/provider secrets server-side on Railway
+- [ ] Authenticate requests from the PWA to the Railway API
+- [ ] Add request validation and clear error handling
+- [ ] Save confirmed meals directly from the PWA to Supabase under RLS
+
+### Daily tracking
+
+- [ ] Show daily calorie target
+- [ ] Calculate calories eaten
+- [ ] Calculate calories remaining
+- [ ] Show basic macro totals
+- [ ] Show meals for the selected day
+- [ ] Edit logged meals
+- [ ] Delete logged meals
+- [ ] Browse previous days
+
+### PWA and mobile web
+
+- [ ] Full core functionality without requiring PWA installation
+- [ ] Installable PWA
+- [ ] Web app manifest and appropriate app icons
+- [ ] Service-worker/cache strategy that does not break normal browsing
+- [ ] Respect mobile safe areas, touch targets, and virtual keyboards
+- [ ] Graceful offline/network error states
+- [ ] Avoid core dependencies on browser-specific PWA APIs
+
+### MVP verification
+
+- [ ] Test common Malaysian meal descriptions
+- [ ] Test vague and specific portion descriptions
+- [ ] Test failed AI/network requests
+- [ ] Verify one user cannot access another user's data
+- [ ] Verify normal browser usage and installed-PWA usage produce the same core results
+- [ ] Test Safari on a real iPhone/iPad
+- [ ] Test Chrome on a real Android device
+- [ ] Test Brave on representative mobile devices where practical
+- [ ] Test mobile keyboard/form behavior for meal input
+- [ ] Test Add to Home Screen / install flow on supported devices
+- [ ] Verify layout at common narrow mobile widths
+
+## Phase 2 — Polish the core
+
+Only after v0.1 works reliably.
+
+Potential improvements:
+
+- Faster repeat-meal logging
+- Recent meals
+- Favorite foods
+- Saved/common meals
+- Better meal grouping
+- Better date navigation
+- Portion presets
+- AI clarification when portions are ambiguous
+- Better confidence/estimate messaging
+- Better nutrition source grounding
+- Accessibility improvements
+- Better cross-browser install guidance
+- PWA install/update UX improvements
+
+## Phase 3 — Real meal planning
+
+The MVP personal plan only calculates a calorie target. A true meal planner comes later.
+
+Potential features:
+
+- Suggested meals based on remaining calories/macros
+- Daily meal plans
+- Weekly meal plans
+- Dietary preferences
+- Excluded foods/allergies
+- Saved meal-plan templates
+- Recipe suggestions
+- Grocery lists
+
+## Phase 4 — Nutrition expansion
+
+Potential features, not commitments:
+
+- Dedicated food/nutrition database
+- Richer macro targets
+- Micronutrients
+- Barcode scanning
+- Recipes and saved meals
+- Weight tracking/history
+- Goal progress
+- Nutrition insights
+- Data export
+
+## Phase 5 — Smart input and integrations
+
+Potential future exploration:
+
+- Photo-based food recognition
+- Camera meal analysis
+- Voice meal logging
+- Apple Health integration
+- Google Health Connect integration
+- Wearables
+
+## Rule for adding features
+
+Before adding a feature, ask:
+
+1. Does this improve the core meal-logging or daily-planning workflow?
+2. Is there evidence we actually need it?
+3. Can we implement a simpler version first?
+4. Will it make everyday logging slower or more confusing?
+5. Does AI add real value here, or are we adding AI for its own sake?
+6. Does it work across our priority mobile browsers without making core functionality fragile?
+
+If a feature adds substantial complexity without improving the core workflow, defer it.
