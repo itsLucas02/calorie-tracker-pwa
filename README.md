@@ -5,8 +5,8 @@
 **Say what you ate. We'll kira the rest.**
 
 KiraCal is a mobile-first PWA for simple AI-assisted calorie and nutrition
-tracking. Describe a meal in plain words â€” *"nasi putih, ayam kari, kangkung
-belacan*" â€” and KiraCal estimates calories and macros, lets you correct every
+tracking. Describe a meal in plain words — *"nasi putih, ayam kari, kangkung
+belacan*" — and KiraCal estimates calories and macros, lets you correct every
 number, logs the meal, and shows how it fits your day.
 
 *(Kira = "count" in Malay. Yes, teh tarik kurang manis works.)*
@@ -16,15 +16,15 @@ number, logs the meal, and shows how it fits your day.
 ```bash
 npm install
 npm run dev        # local dev server
-npm run build      # production build â†’ dist/
+npm run build      # production build → dist/
 ```
 
-No environment variables, keys or accounts needed â€” the whole product loop
+No environment variables, keys or accounts needed — the whole product loop
 works locally with demo data.
 
-**Demo path:** Continue with Google (demo account) â†’ quick plan setup â†’ type a
-meal â†’ Analyse â†’ review/edit items â†’ Save â†’ watch Today update â†’ browse
-History â†’ tweak your plan in Profile â†’ refresh: everything persists.
+**Demo path:** Continue with Google (demo account) → quick plan setup → type a
+meal → Analyse → review/edit items → Save → watch Today update → browse
+History → tweak your plan in Profile → refresh: everything persists.
 
 ## What's inside
 
@@ -38,7 +38,7 @@ History â†’ tweak your plan in Profile â†’ refresh: everything persist
 - **Mock AI analysis** with a Malaysian-food-first database and parsing
   heuristics (quantities, `kurang manis`, `kosong`, graceful fallbacks).
 - **Mifflin-St Jeor** target calculation with manual override; macro targets
-  derived per goal. Clearly labelled estimates â€” never medical advice.
+  derived per goal. Clearly labelled estimates — never medical advice.
 - **PWA foundation**: manifest, icons, theme color. Service worker deferred to
   production hardening.
 
@@ -52,16 +52,16 @@ Everything external lives behind a small interface in `src/services/`, with
 | `MockAuthService` | `SupabaseAuthService` (Google OAuth) |
 | `LocalProfileRepository` | `SupabaseProfileRepository` |
 | `LocalMealRepository` | `SupabaseMealRepository` |
-| `MockMealAnalysisService` | `ApiMealAnalysisService` â†’ `POST /api/analyze-meal` |
+| `MockMealAnalysisService` | `ApiMealAnalysisService` → `POST /api/analyze-meal` |
 
-- `apps/api/` â€” Hono + TypeScript API scaffold (`GET /health`, documented
+- `apps/api/` — Hono + TypeScript API scaffold (`GET /health`, documented
   `/api/analyze-meal` contract; AI provider intentionally not wired).
-- `supabase/migrations/0001_init.sql` â€” table + RLS sketch mirroring
+- `supabase/migrations/0001_init.sql` — table + RLS sketch mirroring
   `src/lib/types.ts`.
-- `docs/architecture.md` â€” the full handoff map.
+- `docs/architecture.md` — the full handoff map.
 
 ## Notes & scope
 
-Nutrition values are rounded human estimates â€” no fake decimal precision, AI
+Nutrition values are rounded human estimates — no fake decimal precision, AI
 output is always editable before saving. Out of scope on purpose: photo/barcode
 logging, meal plans, social features, streaks, payments, and heavy analytics.
